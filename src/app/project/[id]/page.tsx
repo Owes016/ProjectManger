@@ -27,6 +27,23 @@ interface Project {
   tasks?: Task[];
 }
 
+// This function is required when using output: 'export' with dynamic routes
+export async function generateStaticParams() {
+  try {
+    // Fetch all project IDs to pre-render
+    const { data } = await supabase.from('projects').select('id');
+    
+    // Return an array of params to pre-render
+    return (data || []).map((project) => ({
+      id: project.id.toString(),
+    }));
+  } catch (error) {
+    console.error('Error generating static params:', error);
+    // Return empty array if there's an error - will just build the page without pre-rendered paths
+    return [];
+  }
+}
+
 export default function ProjectDetail({ params }: { params: { id: string } }) {
   const { id } = params;
   const [project, setProject] = useState<Project | null>(null);
